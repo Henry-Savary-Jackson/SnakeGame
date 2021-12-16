@@ -50,9 +50,6 @@ public class SnakeGame extends JFrame{
 
     public static void main(String[] args) {
         try {
-            //int w = Integer.valueOf(args[0]);
-            // h = Integer.valueOf(args[1]);
-            
             SwingUtilities.invokeLater(()-> {
                 new SnakeGame(500,500);
             });
