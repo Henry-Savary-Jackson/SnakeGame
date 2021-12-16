@@ -43,23 +43,30 @@ public class Game extends JLabel{
         
         createTiles();
         
-        Snake snake = new Snake(10,10,this);
+        Snake snake = new Snake(7,7,this);
+        snake.Update(this);
         
-        Timer timer = new Timer(2000,(evt)->{
-            Random rand = new Random();
-            int tX = rand.nextInt(tiles.length-2)+1;
-            int tY = rand.nextInt(tiles[0].length-2)+1;
+        Timer timer = new Timer(250,(evt)->{
+            Random spawnRand = new Random();
             
-            Tile tile = tiles[tX][tY];
+            snake.canPress = true;
+            snake.Update(this);
             
-            tile.type = "f";
+            if (spawnRand.nextInt(30) < 2){
+                Random rand = new Random();
+                int tX = rand.nextInt(tiles.length-2)+1;
+                int tY = rand.nextInt(tiles[0].length-2)+1;
+                Tile tile = tiles[tX][tY];
+                if (!tile.type.equals("s")){
+                    tile.type = "f";
+                }
+                drawTile(tile);
+            }
             
-            drawTile(tile);
-            
-            repaint((int)tile.topLeft.x,(int)tile.topLeft.y, tile.width, tile.height);
             System.out.println("timer tick");
             
         });
+        this.addKeyListener(snake);
         timer.start();
 
     }
@@ -116,6 +123,7 @@ public class Game extends JLabel{
         g2d.setColor(clr);
         g2d.fillRect((int)tile.topLeft.x, (int)tile.topLeft.y, tile.width, tile.height);
         g2d.dispose();
+        repaint((int)tile.topLeft.x,(int)tile.topLeft.y, tile.width, tile.height);
     }
     
     @Override
