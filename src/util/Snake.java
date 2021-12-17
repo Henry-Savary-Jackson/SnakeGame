@@ -1,8 +1,7 @@
 
 package util;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ public class Snake implements KeyListener{
         if (g == null){
             return;
         }    
+        boolean feed = false;
         for (int t = 0; t < body.size(); t++){
             
             int[] prevPos = body.get(t).tilePos;
@@ -53,15 +53,13 @@ public class Snake implements KeyListener{
             int[] newPos = new int[]{prevPos[0]+prevDir[0],prevPos[1]+ prevDir[1]};
             
             if(t == 0){
-                if("f".equals(g.tiles[newPos[0]][newPos[1]].type)){
-                    int[] lastDir = body.get(body.size()-1).dir;
-                    int[] lastPos = body.get(body.size()-1).tilePos;
-                    int[] newBodyPos = new int[]{lastPos[0]-lastDir[0], lastPos[1]-lastDir[1]};
-                    body.add(new BodyPart(newBodyPos,lastDir));
+                feed = "f".equals(g.tiles[newPos[0]][newPos[1]].type);
+                if("e".equals(g.tiles[newPos[0]][newPos[1]].type) || "s".equals(g.tiles[newPos[0]][newPos[1]].type)){
+                    game.gameOver();
                 }
             }else{
                 body.get(t).dir = new int[]{body.get(t-1).tilePos[0]-newPos[0],body.get(t-1).tilePos[1]-newPos[1]};
-                if (t == body.size()-1){
+                if (t == body.size()-1 && !g.tiles[prevPos[0]][prevPos[1]].type.equals("e") ){
                     g.tiles[prevPos[0]][prevPos[1]].type = "a";
                     g.drawTile(g.tiles[prevPos[0]][prevPos[1]]);
                 }
@@ -72,6 +70,64 @@ public class Snake implements KeyListener{
             
             body.get(t).tilePos = newPos;
         }
+        if (feed){
+            feed = false;
+            addLength(body.get(body.size()-1));
+        }
+    }
+    
+    void addLength(BodyPart last){
+        int[] l = body.get(body.size()-1).dir;
+        int[] lastDir = new int[]{-l[0],-l[1]};
+        for (int i = 0; i <4 ; i++){
+            //System.out.println(body.size());
+
+            int[] lastPos = body.get(body.size()-1).tilePos;
+            int[] newBodyPos = new int[]{lastPos[0]+lastDir[0], lastPos[1]+lastDir[1]};
+
+            if(game.tiles[newBodyPos[0]][newBodyPos[1]].type.equals("e") || game.tiles[newBodyPos[0]][newBodyPos[1]].type.equals("s")){
+                //System.out.println("problem:" +  Arrays.toString(lastDir));
+                //System.out.println(Arrays.toString(lastPos));
+                int[][] solution = findNewValidPos(lastPos,lastDir);
+
+                if(solution != null){
+                    //System.out.println("sol:" + Arrays.toString(solution[0]));
+                    body.add(new BodyPart(solution[0],solution[1]));
+                    lastDir = new int[]{-solution[1][0],-solution[1][1]};
+                }else {
+                    System.out.println("wtf");
+                    break;
+                }
+            }else{ 
+                body.add(new BodyPart(newBodyPos,lastDir));
+            }
+        }
+    }
+    
+    int[][] findNewValidPos(int[] pos, int[] dir){
+        
+        if(dir[0] == 0){
+            int[] tryPos = new int[]{pos[0] -1, pos[1]};
+            if (!game.tiles[tryPos[0]][tryPos[1]].type.equals("a") ){
+                tryPos = new int[]{pos[0] +1, pos[1]};
+                if (game.tiles[tryPos[0]][tryPos[1]].type.equals("a") ){
+                    return new int[][]{tryPos, new int[]{-1,0} };
+                }
+            } else{
+                return new int[][]{tryPos, new int[]{1,0} };
+            }
+        } else{
+            int[] tryPos = new int[]{pos[0], pos[1] -1};
+            if (!game.tiles[tryPos[0]][tryPos[1]].type.equals("a")){
+                tryPos = new int[]{pos[0], pos[1] + 1};
+                if (game.tiles[tryPos[0]][tryPos[1]].type.equals("a")){
+                    return new int[][]{tryPos, new int[]{0,-1} };
+                }
+            } else{
+                return new int[][]{tryPos, new int[]{0,1} };
+            }
+        }
+        return null;
     }
 
     @Override

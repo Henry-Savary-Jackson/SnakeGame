@@ -28,6 +28,10 @@ public class Game extends JLabel{
     
     public BufferedImage buffer;
     
+    public Timer timer;
+    
+    public Snake snake;
+    
     // Tile[width][height]
     public Tile[][] tiles = new Tile[20][20];
     
@@ -43,34 +47,47 @@ public class Game extends JLabel{
         
         createTiles();
         
-        Snake snake = new Snake(7,7,this);
-        snake.Update(this);
+        snake = new Snake(7,7,this);
         
-        Timer timer = new Timer(250,(evt)->{
-            Random spawnRand = new Random();
+        tiles[5][1].type = "f";
+        drawTile(tiles[5][1]);
+        
+        tiles[5][4].type = "f";
+        drawTile(tiles[5][4]);
+        
+        timer = new Timer(250,(evt)->{
             
-            snake.canPress = true;
-            snake.Update(this);
-            
-            if (spawnRand.nextInt(30) < 2){
-                Random rand = new Random();
-                int tX = rand.nextInt(tiles.length-2)+1;
-                int tY = rand.nextInt(tiles[0].length-2)+1;
-                Tile tile = tiles[tX][tY];
-                if (!tile.type.equals("s")){
-                    tile.type = "f";
+            if (!gameOver){
+                Random spawnRand = new Random();
+                if (spawnRand.nextInt(30) < 2){
+                    Random rand = new Random();
+                    int tX = rand.nextInt(tiles.length-2)+1;
+                    int tY = rand.nextInt(tiles[0].length-2)+1;
+                    Tile tile = tiles[tX][tY];
+                    if (!tile.type.equals("s")){
+                        tile.type = "f";
+                    }
+                    drawTile(tile);
                 }
-                drawTile(tile);
-            }
-            
-            System.out.println("timer tick");
-            
+                
+                snake.canPress = true;
+                snake.Update(this);
+                
+                System.out.println("timer tick");
+                
+            } 
         });
         this.addKeyListener(snake);
         timer.start();
 
     }
     
+    public void gameOver(){
+        gameOver = true;
+        timer.stop();
+        this.removeKeyListener(snake);
+        repaint();
+    }
     //initializes the tiles in the screen and draws them
     public void createTiles(){
         
