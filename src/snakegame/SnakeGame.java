@@ -4,6 +4,7 @@ package snakegame;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,7 +35,7 @@ public class SnakeGame extends JFrame{
         pnlInfo.setBackground(Color.LIGHT_GRAY);
         add(pnlInfo, BorderLayout.SOUTH);
         
-        game = new Game(w,h);
+        game = new Game(w,h, this);
         
         add(game);
         
@@ -46,6 +47,15 @@ public class SnakeGame extends JFrame{
         
         game.requestFocus();
         
+    }
+    
+    @Override
+    public void paintComponents(Graphics g){
+        super.paint(g);
+        if(game == null){
+            lblScore.setText("Score:"+ game.score +" ");
+            lblTime.setText("Score:"+ game.time +" ");
+        }
     }
 
     public static void main(String[] args) {

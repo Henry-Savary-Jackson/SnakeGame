@@ -51,7 +51,7 @@ public class Snake implements KeyListener{
             int[] prevPos = body.get(t).tilePos;
             int[] prevDir = body.get(t).dir;
             int[] newPos = new int[]{prevPos[0]+prevDir[0],prevPos[1]+ prevDir[1]};
-            
+            System.out.println("newPos: "+ Arrays.toString(newPos) + String.valueOf(t));
             if(t == 0){
                 feed = "f".equals(g.tiles[newPos[0]][newPos[1]].type);
                 if("e".equals(g.tiles[newPos[0]][newPos[1]].type) || "s".equals(g.tiles[newPos[0]][newPos[1]].type)){
@@ -59,7 +59,8 @@ public class Snake implements KeyListener{
                 }
             }else{
                 body.get(t).dir = new int[]{body.get(t-1).tilePos[0]-newPos[0],body.get(t-1).tilePos[1]-newPos[1]};
-                if (t == body.size()-1 && !g.tiles[prevPos[0]][prevPos[1]].type.equals("e") ){
+                if (t == body.size()-1 ){
+                    System.out.println("clearing tile:" + Arrays.toString(prevPos) + String.valueOf(t));
                     g.tiles[prevPos[0]][prevPos[1]].type = "a";
                     g.drawTile(g.tiles[prevPos[0]][prevPos[1]]);
                 }
@@ -72,36 +73,48 @@ public class Snake implements KeyListener{
         }
         if (feed){
             feed = false;
-            addLength(body.get(body.size()-1));
+            g.score ++;
+            addLength(3);
+            body.stream().forEach(b->System.out.println(Arrays.toString(b.tilePos)));
         }
     }
     
-    void addLength(BodyPart last){
-        int[] l = body.get(body.size()-1).dir;
-        int[] lastDir = new int[]{-l[0],-l[1]};
-        for (int i = 0; i <4 ; i++){
+    void addLength(int count){
+        
+        for (int i = 0; i <count ; i++){
             //System.out.println(body.size());
-
+            int[] lastDir = body.get(body.size()-1).dir;
             int[] lastPos = body.get(body.size()-1).tilePos;
-            int[] newBodyPos = new int[]{lastPos[0]+lastDir[0], lastPos[1]+lastDir[1]};
+            
+            int[] backDir = invertDir(lastDir);
+            
+            int[] newBodyPos = new int[]{lastPos[0]+backDir[0], lastPos[1]+backDir[1]};
 
             if(game.tiles[newBodyPos[0]][newBodyPos[1]].type.equals("e") || game.tiles[newBodyPos[0]][newBodyPos[1]].type.equals("s")){
-                //System.out.println("problem:" +  Arrays.toString(lastDir));
+                //System.out.println("problem:" +  Arrays.toString(backDir));
                 //System.out.println(Arrays.toString(lastPos));
-                int[][] solution = findNewValidPos(lastPos,lastDir);
+                int[][] solution = findNewValidPos(lastPos,backDir);
 
                 if(solution != null){
                     //System.out.println("sol:" + Arrays.toString(solution[0]));
-                    body.add(new BodyPart(solution[0],solution[1]));
-                    lastDir = new int[]{-solution[1][0],-solution[1][1]};
+                    //body.get(t).dir = new int[]{body.get(t-1).tilePos[0]-newPos[0],body.get(t-1).tilePos[1]-newPos[1]};
+                   //int[] newDir = body;
+                    int[] prev = body.get(body.size()-1).tilePos;
+                    int[] diff = new int[]{prev[0]-solution[0][0], prev[1] - solution[0][1]};
+                    body.add(new BodyPart(solution[0],diff));
+                    
                 }else {
-                    System.out.println("wtf");
+                    System.out.println("wtf!");
                     break;
                 }
             }else{ 
                 body.add(new BodyPart(newBodyPos,lastDir));
             }
         }
+    }
+    
+    public int[] invertDir(int[] dir){
+        return new int[]{-dir[0],-dir[1]};
     }
     
     int[][] findNewValidPos(int[] pos, int[] dir){
@@ -157,15 +170,6 @@ public class Snake implements KeyListener{
             tilePos = pos;
             dir = inDir;
         }
-        
-        public void setTilePos(int[] newPos){
-            tilePos = newPos;
-        }
-        
-        public void setDirection(int[] newDir){
-            dir = newDir;
-        }
-    
     }
 }
 

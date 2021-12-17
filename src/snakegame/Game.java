@@ -10,10 +10,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.Timer;
 import util.Snake;
-import util.Snake.BodyPart;
 import util.Tile;
 
 public class Game extends JLabel{
@@ -26,18 +26,28 @@ public class Game extends JLabel{
     public int tileWidth;
     public int tileHeight;
     
+    public long ticks;
+    
+    public int time;
+    
+    public int score;
+    
     public BufferedImage buffer;
     
     public Timer timer;
     
     public Snake snake;
     
+    public JFrame frame;
+    
     // Tile[width][height]
     public Tile[][] tiles = new Tile[20][20];
     
-    public Game(int w, int h){
+    public Game(int w, int h, JFrame f){
         super();
         setSize(w, h);
+        
+        frame = f;
         
         setPreferredSize(getSize());
         buffer = createBuffer();
@@ -57,9 +67,13 @@ public class Game extends JLabel{
         
         timer = new Timer(250,(evt)->{
             
+            if(ticks % 4 == 0){
+                time ++;
+            }
+            
             if (!gameOver){
                 Random spawnRand = new Random();
-                if (spawnRand.nextInt(30) < 2){
+                if (spawnRand.nextInt(30) < 3){
                     Random rand = new Random();
                     int tX = rand.nextInt(tiles.length-2)+1;
                     int tY = rand.nextInt(tiles[0].length-2)+1;
@@ -73,8 +87,9 @@ public class Game extends JLabel{
                 snake.canPress = true;
                 snake.Update(this);
                 
+                ticks++;
                 System.out.println("timer tick");
-                
+                frame.repaint();
             } 
         });
         this.addKeyListener(snake);
