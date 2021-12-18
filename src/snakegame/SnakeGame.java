@@ -41,20 +41,19 @@ public class SnakeGame extends JFrame{
         
         pack();
         
-        getContentPane().setPreferredSize(getSize());
-        
         setVisible(true);
         
         game.requestFocus();
         
     }
     
+    
     @Override
-    public void paintComponents(Graphics g){
+    public void paint(Graphics g){
         super.paint(g);
-        if(game == null){
-            lblScore.setText("Score:"+ game.score +" ");
-            lblTime.setText("Score:"+ game.time +" ");
+        if (game != null){
+            lblTime.setText("Time:" + String.valueOf(game.time) + "s");
+            lblScore.setText("Score:" + String.valueOf(game.score));
         }
     }
 

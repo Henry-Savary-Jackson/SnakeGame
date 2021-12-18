@@ -18,6 +18,4 @@ public class Tile {
         width = w;
         height = h;
     }
-    
-    
 }

@@ -9,14 +9,18 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Random;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import util.Snake;
 import util.Tile;
 
-public class Game extends JLabel{
+public class Game extends JPanel{
     
     public int length;
     public boolean gameOver = false;
@@ -28,9 +32,9 @@ public class Game extends JLabel{
     
     public long ticks;
     
-    public int time;
+    public int time = 0;
     
-    public int score;
+    public int score = 0;
     
     public BufferedImage buffer;
     
@@ -39,6 +43,8 @@ public class Game extends JLabel{
     public Snake snake;
     
     public JFrame frame;
+    
+    public JButton start = new JButton("Start");
     
     // Tile[width][height]
     public Tile[][] tiles = new Tile[20][20];
@@ -55,53 +61,86 @@ public class Game extends JLabel{
         tileWidth = getWidth()/tiles.length;
         tileHeight = getHeight()/tiles[0].length;
         
-        createTiles();
+        //createTiles();
         
-        snake = new Snake(7,7,this);
-        
-        tiles[5][1].type = "f";
-        drawTile(tiles[5][1]);
-        
-        tiles[5][4].type = "f";
-        drawTile(tiles[5][4]);
-        
-        timer = new Timer(250,(evt)->{
-            
-            if(ticks % 4 == 0){
-                time ++;
-            }
-            
-            if (!gameOver){
-                Random spawnRand = new Random();
-                if (spawnRand.nextInt(30) < 3){
-                    Random rand = new Random();
-                    int tX = rand.nextInt(tiles.length-2)+1;
-                    int tY = rand.nextInt(tiles[0].length-2)+1;
-                    Tile tile = tiles[tX][tY];
-                    if (!tile.type.equals("s")){
-                        tile.type = "f";
-                    }
-                    drawTile(tile);
-                }
-                
-                snake.canPress = true;
-                snake.Update(this);
-                
-                ticks++;
-                System.out.println("timer tick");
-                frame.repaint();
-            } 
-        });
-        this.addKeyListener(snake);
-        timer.start();
+        timer = new Timer(250,(event)->{
+                    System.out.println(Arrays.toString(this.getKeyListeners()));
+                     if(ticks % 4 == 0){
+                         time ++;
+                         updateJFrame();
+                     }
+                     if (!gameOver){
+                         snake.canPress = true;
+                         snake.Update(this);
 
+                         ticks++;
+                         System.out.println("timer tick" + String.valueOf(time));
+
+                     }else {
+                         gameOver();
+                     } 
+        });
+        
+        start.addActionListener((evt)->{
+            if (evt.getSource() == start){
+                time = 0;
+                score = 0;
+                ticks = 0;
+                gameOver = false;
+                createTiles();
+                snake = new Snake(7,7,this);
+                snake.Update(this);
+                this.addKeyListener(snake);
+                createFood();
+                timer.start();
+                start.setVisible(false);
+                this.requestFocus();
+            }
+        });
+        
+        createStart("Start");
+        start.setVisible(true);
+        add(start);
+        repaint();
     }
     
-    public void gameOver(){
+    public void createFood(){
+        Random rand = new Random();
+        int tX = rand.nextInt(tiles.length-2)+1;
+        int tY = rand.nextInt(tiles[0].length-2)+1;
+        Tile tile = tiles[tX][tY];
+        
+        while(!tile.type.equals("a")){
+            tX = rand.nextInt(tiles.length-2)+1;
+            tY = rand.nextInt(tiles[0].length-2)+1;
+            tile = tiles[tX][tY];
+        }
+        tile.type = "f";
+        drawTile(tile);
+    }
+    
+    public void updateJFrame(){
+        int x = 0;
+        int y = this.getHeight();
+        int width = frame.getWidth();
+        int height = frame.getHeight() - y;
+        frame.repaint(x,y,width,height);
+    }
+    
+    public void gameOver() {
         gameOver = true;
         timer.stop();
-        this.removeKeyListener(snake);
-        repaint();
+        SwingUtilities.invokeLater(()->{
+            this.removeKeyListener(snake);
+        });
+        createStart("Restart");
+    }
+    
+    public void createStart(String r){
+        start.setText(r);
+        start.setVisible(true);
+        start.setEnabled(true);
+        start.requestFocus();
     }
     //initializes the tiles in the screen and draws them
     public void createTiles(){
@@ -160,6 +199,7 @@ public class Game extends JLabel{
     
     @Override
     public void paint(Graphics g){
+        super.paint(g);
         if (buffer != null){
             g.drawImage(buffer, 0, 0, this);
         }
