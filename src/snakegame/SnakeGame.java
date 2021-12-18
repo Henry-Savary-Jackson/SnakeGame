@@ -48,8 +48,8 @@ public class SnakeGame extends JFrame{
     
     
     @Override
-    public void paintComponents(Graphics g){
-        super.paintComponents(g);
+    public void paint(Graphics g){
+        super.paint(g);
         if (game != null){
             lblTime.setText("Time:" + String.valueOf(game.time) + "s");
             lblScore.setText("Score:" + String.valueOf(game.score));
