@@ -1,19 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package snakegame;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -25,6 +19,7 @@ public class Game extends JPanel{
     public int length;
     public boolean gameOver = false;
     
+    //constant for the width of the black border in each tile position
     public final float tileBorderPercent = 0.05f;
     
     public int tileWidth;
@@ -45,8 +40,8 @@ public class Game extends JPanel{
     public JFrame frame;
     
     public JButton start = new JButton("Start");
-    
     // Tile[width][height]
+    //grid for each position  within the scene
     public Tile[][] tiles = new Tile[20][20];
     
     public Game(int w, int h, JFrame f){
@@ -56,15 +51,19 @@ public class Game extends JPanel{
         frame = f;
         
         setPreferredSize(getSize());
+        
         buffer = createBuffer();
         
         tileWidth = getWidth()/tiles.length;
         tileHeight = getHeight()/tiles[0].length;
         
-        //createTiles();
+        createTiles();
+        createStart("Start");
+        
+        add(start);
         
         timer = new Timer(250,(event)->{
-                    System.out.println(Arrays.toString(this.getKeyListeners()));
+            //updates to occur 4 times a second
                      if(ticks % 4 == 0){
                          time ++;
                          updateJFrame();
@@ -74,15 +73,16 @@ public class Game extends JPanel{
                          snake.Update(this);
 
                          ticks++;
-                         System.out.println("timer tick" + String.valueOf(time));
 
                      }else {
                          gameOver();
                      } 
+                     
         });
         
         start.addActionListener((evt)->{
             if (evt.getSource() == start){
+                //reset the whole scene and makes it playable
                 time = 0;
                 score = 0;
                 ticks = 0;
@@ -98,27 +98,28 @@ public class Game extends JPanel{
             }
         });
         
-        createStart("Start");
-        start.setVisible(true);
-        add(start);
-        repaint();
+        
     }
     
     public void createFood(){
         Random rand = new Random();
+        //chooses a random tile position to put the food inside the edges
         int tX = rand.nextInt(tiles.length-2)+1;
         int tY = rand.nextInt(tiles[0].length-2)+1;
         Tile tile = tiles[tX][tY];
         
+        //if first chosen position is invalid, retry until it is
         while(!tile.type.equals("a")){
             tX = rand.nextInt(tiles.length-2)+1;
             tY = rand.nextInt(tiles[0].length-2)+1;
             tile = tiles[tX][tY];
         }
+        //draws the food tile
         tile.type = "f";
         drawTile(tile);
     }
     
+    //used to only update the statistics part of the screen in the botto,
     public void updateJFrame(){
         int x = 0;
         int y = this.getHeight();
@@ -128,6 +129,7 @@ public class Game extends JPanel{
     }
     
     public void gameOver() {
+        //stops timer, disallows user input, then displays restart button
         gameOver = true;
         timer.stop();
         SwingUtilities.invokeLater(()->{
@@ -137,26 +139,33 @@ public class Game extends JPanel{
     }
     
     public void createStart(String r){
+        //shows the start or restart button
         start.setText(r);
         start.setVisible(true);
-        start.setEnabled(true);
         start.requestFocus();
     }
-    //initializes the tiles in the screen and draws them
+    
+    //initializes the <tiles> in the screen and draws them
     public void createTiles(){
         
+        //decides width, height, and x offset of every tile
         final int width = (int) (tileWidth * (1-(2*tileBorderPercent)));
         final int height = (int)(tileHeight * (1-(2*tileBorderPercent)));
         int incrX = (int) (tileWidth * tileBorderPercent);
         for (int c = 0; c < tiles.length; c++){
+            //decides the y offset for every tile
             int incrY =(int) (tileHeight * tileBorderPercent);
             if( c == 0 || c ==tiles.length -1){
+                //if the current x position is the first or last one, fill the entire column
+                //with edge tiles
                 for (int r = 0; r< tiles[c].length; r ++){
                     tiles[c][r] = new Tile("e",incrX , incrY ,width,height);
                     drawTile(tiles[c][r]);
                     incrY += tileHeight;
                 }
             } else{
+                //if not, simply make the first and last tiles in the column edge tiles,
+                // and the rest air tiles
                 for (int r = 0; r< tiles[c].length; r ++){
                     String type = "a";
                     if (r ==0 || r == tiles[c].length-1) {
@@ -172,6 +181,7 @@ public class Game extends JPanel{
         System.out.println("Tiles created");
     }
     
+    //draws the colour of a tile based on its <type>
     public void drawTile(Tile tile){
         if (buffer == null){
             return;
@@ -192,19 +202,23 @@ public class Game extends JPanel{
         }
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(clr);
+        //draws it on the <BufferedImage> object
         g2d.fillRect((int)tile.topLeft.x, (int)tile.topLeft.y, tile.width, tile.height);
         g2d.dispose();
+        //updates only the space the drawn tile takes up on the screen
         repaint((int)tile.topLeft.x,(int)tile.topLeft.y, tile.width, tile.height);
     }
     
     @Override
-    public void paint(Graphics g){
-        super.paint(g);
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
         if (buffer != null){
             g.drawImage(buffer, 0, 0, this);
         }
+        
     }
     
+    //creates the black background to the <BufferedImage> when it is first created
     public BufferedImage createBuffer(){
         BufferedImage buff = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = buff.createGraphics();
