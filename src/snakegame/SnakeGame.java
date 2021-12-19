@@ -11,8 +11,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-
-
 public class SnakeGame extends JFrame{
     public JLabel lblScore = new JLabel("Score:");
     public JLabel lblTime = new JLabel("Time:");
@@ -29,6 +27,7 @@ public class SnakeGame extends JFrame{
         
         setLayout(new BorderLayout());
         
+        //adds the statistics panel at the bottom
         pnlInfo.add(lblScore);
         pnlInfo.add(lblTime);
         pnlInfo.setOpaque(true);
