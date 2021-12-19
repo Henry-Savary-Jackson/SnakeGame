@@ -56,15 +56,30 @@ public class SnakeGame extends JFrame{
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            SwingUtilities.invokeLater(()-> {
-                new SnakeGame(500,500);
-            });
-        } catch(NumberFormatException ex) {
-            System.out.print("Invalid width and/or height entered.");
+    public static void main(String[] args) throws NumberFormatException , IndexOutOfBoundsException {
+        
+                final int columns;
+                final int rows ;
+                try {
+                    columns = Integer.parseInt(args[0]);
+                    rows  = Integer.parseInt(args[1]);
+                } catch(NumberFormatException ex) {
+                    System.out.print("Invalid columns and/or rows entered.\n\n");
+                    throw ex;
+                } catch ( IndexOutOfBoundsException indexErr){
+                    System.out.print("Please Enter columns AND rows of the game.\n\n");
+                    throw indexErr;
+                }
+                
+                boolean validColumns = columns>= 15 && columns<=35;
+                boolean validRows = rows>= 15 && rows <=35;
+                if (validColumns && validRows){
+                    SwingUtilities.invokeLater(()-> {
+                        new SnakeGame(columns,rows);
+                    });
+                } else {
+                    System.out.println("Columns and rows should be in between 15 and 35.");
+                }
+            
         }
-       
-    }
-    
 }

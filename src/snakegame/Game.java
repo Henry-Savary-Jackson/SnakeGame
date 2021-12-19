@@ -16,14 +16,16 @@ import util.Tile;
 
 public class Game extends JPanel{
     
-    public int length;
+    public int width;
+    public int height;
+    
     public boolean gameOver = false;
     
     //constant for the width of the black border in each tile position
     public final float tileBorderPercent = 0.05f;
     
-    public int tileWidth;
-    public int tileHeight;
+    public static final int tileWidth = 25;
+    public static final int tileHeight = 25;
     
     public long ticks;
     
@@ -40,22 +42,24 @@ public class Game extends JPanel{
     public JFrame frame;
     
     public JButton start = new JButton("Start");
-    // Tile[width][height]
+    //Tile[width][height]
     //grid for each position  within the scene
-    public Tile[][] tiles = new Tile[20][20];
+    public Tile[][] tiles ;
     
-    public Game(int w, int h, JFrame f){
+    public Game(int c, int r, JFrame f){
         super();
-        setSize(w, h);
+        
+        tiles = new Tile[c][r];
+        
+        width = c * tileWidth;
+        
+        height = r * tileHeight;
+        setSize(width, height);
         
         frame = f;
         
         setPreferredSize(getSize());
-        
-        buffer = createBuffer();
-        
-        tileWidth = getWidth()/tiles.length;
-        tileHeight = getHeight()/tiles[0].length;
+        buffer = createBuffer(width , height);
         
         createTiles();
         createStart("Start");
@@ -88,7 +92,7 @@ public class Game extends JPanel{
                 ticks = 0;
                 gameOver = false;
                 createTiles();
-                snake = new Snake(7,7,this);
+                snake = new Snake(c/2,r/2,this);
                 snake.Update(this);
                 this.addKeyListener(snake);
                 createFood();
@@ -149,12 +153,13 @@ public class Game extends JPanel{
     public void createTiles(){
         
         //decides width, height, and x offset of every tile
-        final int width = (int) (tileWidth * (1-(2*tileBorderPercent)));
-        final int height = (int)(tileHeight * (1-(2*tileBorderPercent)));
-        int incrX = (int) (tileWidth * tileBorderPercent);
+        final float width = tileWidth * (1-(2*tileBorderPercent));
+        final float height = tileHeight * (1-(2*tileBorderPercent));
+        
+        float incrX = (tileWidth * tileBorderPercent);
         for (int c = 0; c < tiles.length; c++){
             //decides the y offset for every tile
-            int incrY =(int) (tileHeight * tileBorderPercent);
+            float incrY = (tileHeight * tileBorderPercent);
             if( c == 0 || c ==tiles.length -1){
                 //if the current x position is the first or last one, fill the entire column
                 //with edge tiles
@@ -178,7 +183,6 @@ public class Game extends JPanel{
             }
             incrX += tileWidth;
         }
-        System.out.println("Tiles created");
     }
     
     //draws the colour of a tile based on its <type>
@@ -203,10 +207,10 @@ public class Game extends JPanel{
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(clr);
         //draws it on the <BufferedImage> object
-        g2d.fillRect((int)tile.topLeft.x, (int)tile.topLeft.y, tile.width, tile.height);
+        g2d.fillRect((int)tile.topLeft.x,(int)tile.topLeft.y,(int)tile.width, (int)tile.height);
         g2d.dispose();
         //updates only the space the drawn tile takes up on the screen
-        repaint((int)tile.topLeft.x,(int)tile.topLeft.y, tile.width, tile.height);
+        repaint((int)tile.topLeft.x,(int)tile.topLeft.y,(int)tile.width, (int)tile.height);
     }
     
     @Override
@@ -219,8 +223,8 @@ public class Game extends JPanel{
     }
     
     //creates the black background to the <BufferedImage> when it is first created
-    public BufferedImage createBuffer(){
-        BufferedImage buff = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+    public BufferedImage createBuffer(int w, int h){
+        BufferedImage buff = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = buff.createGraphics();
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, buff.getWidth(), buff.getHeight());
