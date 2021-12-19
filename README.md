@@ -1,2 +1,2 @@
 # SnakeGame
-A recreation of snake game I am working on to practice java
+A recreation of snake game I made to practice my java skills.
